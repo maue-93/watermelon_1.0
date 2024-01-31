@@ -136,7 +136,7 @@ class UserAccess (ModelWithCreateUpdateTime):
     is_valid = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='project_accesses', null=True, on_delete=models.SET_NULL)
     is_creator = models.BooleanField(default=False)
-    # is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
     project = models.ForeignKey(Project, related_name='user_accesses', on_delete=models.CASCADE)
     mark_complete = models.BooleanField(default=False)
     difficulty = models.PositiveSmallIntegerField(default=DEFAULT_DIFFICULTY, choices=DIFFICULTY_CHOICES)
