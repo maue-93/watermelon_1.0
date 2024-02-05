@@ -17,20 +17,19 @@ from .constants import  DEFAULT_DIFFICULTY, DIFFICULTY_CHOICES, \
 
 
 """
-    last review : 12/29/2023 - by eliso morazara
+    last review : 02/05/2024 - by eliso morazara
     NOTICE: 1 - Use of settings.AUTH_USER_MODEL >> that is set to core.User >> in project settings >> defined in core
 
-    TO DO : 1 - Create DeleteRequest to delete a project
-            2 - Correctly set up the fields that have values depending on other fields
-            3 - Correctly set up the default values  
-            4 - Set up __str__ for each model
+    TO DO : 1 - Correctly set up the fields that have values depending on other fields
+            2 - Correctly set up the default values  
+            3 - Set up __str__ for each model
 """
 
 
 # Create your models here.
 """
     last review : 12/29/2023 - by eliso morazara
-    abstract model = ModelWithCreateUpdateTime
+    abstract model = WithCreateUpdateTrashTime
     USES:   1 - Any models that need created_at and updated_at fields can inherit from it
             2 - Avoid errors in repetition
 
@@ -43,12 +42,13 @@ from .constants import  DEFAULT_DIFFICULTY, DIFFICULTY_CHOICES, \
         - Session
         - Task
 """
-class ModelWithCreateUpdateTime(models.Model):
+class WithCreateUpdateTrashTime(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    trashed_at = models.DateTimeField(null=True)
     class Meta:
         abstract = True
-# end of ModelWithCreateUpdateTime
+# end of WithCreateUpdateTrashTime
 
 
 """
@@ -86,7 +86,7 @@ class ModelWithCreateUpdateTime(models.Model):
         - progresses : model = Progress : set of progresses made on this project
         - topics : model = Topics : set of task topics in this project, their hierarchy can be retrieved from them
 """
-class Project (ModelWithCreateUpdateTime):
+class Project (WithCreateUpdateTrashTime):
     title = models.CharField(max_length=150)
     description = models.TextField(blank=True) 
     deadline = models.DateField(editable=True, null=True, blank=True) 
@@ -132,7 +132,7 @@ class Project (ModelWithCreateUpdateTime):
         - removal_requests : model = RemovalRequest : set of requests to invalidate this UserAccess
         - sessions : model = Session : set of sessions done by this user on this project
 """
-class UserAccess (ModelWithCreateUpdateTime):
+class UserAccess (WithCreateUpdateTrashTime):
     is_valid = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='project_accesses', null=True, on_delete=models.SET_NULL)
     is_creator = models.BooleanField(default=False)
@@ -172,7 +172,7 @@ class UserAccess (ModelWithCreateUpdateTime):
     RELATED FIELDS : 
         - 
 """
-class AccessRequest (ModelWithCreateUpdateTime):
+class AccessRequest (WithCreateUpdateTrashTime):
     is_invite = models.BooleanField()
     is_accepted = models.BooleanField(default=False) # true if the invitee or a collaborator accepts
     is_declined = models.BooleanField(default=False) # true if the invitee or a collaborator decline
@@ -205,7 +205,7 @@ class AccessRequest (ModelWithCreateUpdateTime):
     TO DO : 1 - Add a is_past_due field that will be True when this RemovalRequest is 
                 DEFAULT_DAYS_TO_REMOVAL_REQUEST_DEADLINE old or more.
 """
-class RemovalRequest (ModelWithCreateUpdateTime): 
+class RemovalRequest (WithCreateUpdateTrashTime): 
     is_approved = models.BooleanField()
     requester_access = models.ForeignKey(UserAccess, related_name='removals_out', null=True, on_delete=models.SET_NULL)
     access_to_invalidate = models.ForeignKey(UserAccess, related_name='removals_in', on_delete=models.CASCADE)
@@ -250,7 +250,7 @@ class RemovalRequest (ModelWithCreateUpdateTime):
 
     TO DO : 1 - Find out how to add fields and validators to the JSONField data_points
 """
-class Progress (ModelWithCreateUpdateTime):
+class Progress (WithCreateUpdateTrashTime):
     project = models.ForeignKey(Project, related_name='progresses', on_delete=models.CASCADE, null=False)
     difficulty = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)])
     weight = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)])
@@ -293,7 +293,7 @@ class Progress (ModelWithCreateUpdateTime):
         - tasks : model = Task : a set of tasks the user reports to have done durring this session
     
 """
-class Session (ModelWithCreateUpdateTime):
+class Session (WithCreateUpdateTrashTime):
     is_instant = models.BooleanField(default=True)
     user_access = models.ForeignKey(UserAccess, related_name='sessions', null=True, on_delete=models.SET_NULL)
     start_at = models.DateTimeField(null=True, blank=True)
@@ -324,7 +324,7 @@ class Session (ModelWithCreateUpdateTime):
         - projects : model = TopicInProject : set of links between this topic and the projects it is used in
     
 """
-class Topic (ModelWithCreateUpdateTime):
+class Topic (WithCreateUpdateTrashTime):
     title = models.CharField(max_length=DEFAULT_TOPIC_TITLE_MAX_LENGTH, unique=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='topics', null=True, on_delete=models.SET_NULL)
 # end of Topic
@@ -352,7 +352,7 @@ class Topic (ModelWithCreateUpdateTime):
     RELATED FIELDS : 
         - subtopics : model : TopicInProject : set of subtopics of this topic in this project
 """
-class TopicInProject(ModelWithCreateUpdateTime):
+class TopicInProject(WithCreateUpdateTrashTime):
     topic = models.ForeignKey(Topic, related_name='projects', on_delete=models.CASCADE)
     project = models.ForeignKey(Project, related_name='topics', on_delete=models.CASCADE)
     parent = models.ForeignKey("TopicInProject", related_name='subtopics', null=True, on_delete=models.CASCADE)
@@ -384,7 +384,7 @@ class TopicInProject(ModelWithCreateUpdateTime):
     RELATED FIELDS:
         - 
 """
-class Task (ModelWithCreateUpdateTime):
+class Task (WithCreateUpdateTrashTime):
     description = models.CharField(max_length=255)
     session = models.ForeignKey(Session, related_name='tasks', on_delete=models.CASCADE)
     duration_estimate = models.DurationField(null=True)
