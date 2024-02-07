@@ -134,7 +134,7 @@ class Project (WithCreateUpdateTrashTime):
 """
 class UserAccess (WithCreateUpdateTrashTime):
     is_valid = models.BooleanField(default=True)
-    hide = models.BooleanField(default=False)
+    show_project = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='project_accesses', null=True, on_delete=models.SET_NULL)
     is_creator = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
