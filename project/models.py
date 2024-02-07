@@ -107,16 +107,16 @@ class Project (WithCreateUpdateTrashTime):
 
     USES :  1 - A long term token for a user to have access to a project
             2 - Can see who is active on the project at the moment
-            3 - A user can assign difficulty and weight to the project
+            3 - A user can assign difficulty and weight to the project (if not root project)
 
     HOW IT WORKS : 
             1 - A UserAccess is created at the creation of a project (the is_creator is True)
             2 - Each time a user has accepted an invite, a UserAccess is created
             3 - Each time a user whose request to join is accepted, a UserAccess is created
-            4 - The is_valid field is False when the user is removed from the project
+            4 - The has_access field is False when the user is removed from the project
             5 - If a user had access before, then removed, then invited back:
                 a - no extra UserAccess is created
-                b - only the is_valid field is changed back to True
+                b - only the has_access field is changed back to True
             6 - The is_active field is True when the user is currently working on this project
             7 - The mark_complete field is True when the user marks the project complete
             8 - The show_project field is False when the user decide to hide the projects from feed, notifications, and
@@ -125,11 +125,10 @@ class Project (WithCreateUpdateTrashTime):
 
     NOTICE: 1 - We should worry about is_creator only at the creation of the project
             2 - A project can have many creators
-            3 - The is_valid field is False when the user is removed from the project
+            3 - The has_access field is False when the user is removed from the project
             
-    TO DO : 1 - Is it necessary for a project to be able to have many creators?
+    TO DO : 1 - Could it be useful for a project to be able to have many creators?
             2 - If Yes, Think of ways for a project to have many creators at creation
-            3 - maybe we can add list of user acces as jsonfield in user instead
 
     RELATED FIELDS :
         - invites : model = AccessRequest : set of invites sent from the user of this access to join this project
@@ -169,7 +168,7 @@ class UserAccess (WithCreateUpdateTrashTime):
             3 - The is_approved field is True when the group approves it by ACCEPT_NEW_ASSOCIATE_VOTE_RATE %.
             4 - A UserAccess is created if accepted and the user has never been an associate on this project and
                 user_access = the created access
-            5 - If the user already has an invalid access, the is_valid field of the access is turned back to True and
+            5 - If the user already has an invalid access, the has_access field of the access is turned back to True and
                 user_access = that access
                 
     NOTICE: 1 - 
@@ -184,7 +183,6 @@ class AccessRequest (WithCreateUpdateTrashTime):
     is_invite = models.BooleanField()
     is_accepted = models.BooleanField(default=False) # true if the invitee or a collaborator accepts
     is_declined = models.BooleanField(default=False) # true if the invitee or a collaborator decline
-    is_approved = models.BooleanField()
     inviter_access = models.ForeignKey(UserAccess, related_name='invites', null=True, on_delete=models.SET_NULL)
     invitee = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='access_requests', null=False, 
                                 on_delete=models.CASCADE)
@@ -201,11 +199,11 @@ class AccessRequest (WithCreateUpdateTrashTime):
 
     HOW IT WORKS: 
             1 - Once REMOVE_ASSOCIATE_VOTE_RATE % of the group approve, is_approved becomes True, 
-                then the is_valid field in the access_to_invalidate to False
+                then the has_access field in the access_to_invalidate to False
             2 - In case a user removes themself: 
                 a - the requester_access and access_to_invalidate are the same
                 b - is_approved is right away True
-                c - the is_valid field in the access_to_invalidate becomes False
+                c - the has_access field in the access_to_invalidate becomes False
 
 
     NOTICE: 1 - 
