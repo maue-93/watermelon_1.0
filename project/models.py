@@ -28,7 +28,7 @@ from .constants import  DEFAULT_DIFFICULTY, DIFFICULTY_CHOICES, \
 
 # Create your models here.
 """
-    last review : 12/29/2023 - by eliso morazara
+    last review : 02/05/2023 - by eliso morazara
     abstract model = WithCreateUpdateTrashTime
     USES:   1 - Any models that need created_at and updated_at fields can inherit from it
             2 - Avoid errors in repetition
@@ -52,18 +52,18 @@ class WithCreateUpdateTrashTime(models.Model):
 
 
 """
-    last review : 12/29/2023 - by eliso morazara
+    last review : 02/05/2023 - by eliso morazara
 
-    MODEL = Project : a created project or goal
+    MODEL = Project : a project/goal
 
-    USES :  1 - Have a base point to track how your project or goal going
+    USES :  1 - A base point to track how a project or sub-project is going
 
     WHY :   1 - Underatanding how far you have come and how far there is left to go in your project is essential
 
     HOW IT WORKS : 
             1 - You can create a Project with a button
-            2 - Add the title and optional description
-            3 - You can invite others to work on the project with you
+            2 - Add the title, optional description, and optional deadline
+            3 - After you have created the project, it asks if you want to invite someone to the project.
 
     NOTICE: 1 - If change Model Class Name, MAKE SURE to update model string name in parent field
             2 - The creator of the project is determined by the UserAccess model;
@@ -134,6 +134,7 @@ class Project (WithCreateUpdateTrashTime):
 """
 class UserAccess (WithCreateUpdateTrashTime):
     is_valid = models.BooleanField(default=True)
+    hide = models.BooleanField(default=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='project_accesses', null=True, on_delete=models.SET_NULL)
     is_creator = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
