@@ -108,7 +108,7 @@ class UserAccessSerializer (serializers.ModelSerializer):
 class AccessRequestSerializer (serializers.ModelSerializer):
     class Meta:
         model = AccessRequest
-        fields = ['is_invite', 'is_accepted', 'is_approved', 'inviter_access', 'invitee', 'user_access']
+        fields = ['is_invite', 'is_accepted', 'inviter_access', 'invitee', 'user_access']
         read_only_fields = ['user_access']
 # end of AccessRequestSerializer
         

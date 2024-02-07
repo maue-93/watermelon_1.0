@@ -28,7 +28,7 @@ from .constants import  DEFAULT_DIFFICULTY, DIFFICULTY_CHOICES, \
 
 # Create your models here.
 """
-    last review : 02/07/2023 - by eliso morazara
+    last review : 02/07/2024 - by eliso morazara
 
     ABSTRACT MODEL = WithCreateUpdateTrashTime
 
@@ -54,7 +54,7 @@ class WithCreateUpdateTrashTime(models.Model):
 
 
 """
-    last review : 02/07/2023 - by eliso morazara
+    last review : 02/07/2024 - by eliso morazara
 
     MODEL = Project : a project/goal
 
@@ -101,7 +101,7 @@ class Project (WithCreateUpdateTrashTime):
 
 
 """
-    last review : 02/07/2023 - by eliso morazara
+    last review : 02/07/2024 - by eliso morazara
 
     MODEL = UserAccess : a user access to a project
 
@@ -152,21 +152,21 @@ class UserAccess (WithCreateUpdateTrashTime):
 
 
 """
-    last review : 12/30/2023 - by eliso morazara
+    last review : 02/07/2024 - by eliso morazara
     MODEL = AccessRequest : invitation or request to join a project
 
-    USES :  1 - For a user that has access : Sends a one request to the invitee to join and same request to the group to 
-                approve it. Once the invitee accepts and ACCEPT_NEW_ASSOCIATE_VOTE_RATE % of the group accept, 
-                the new associate is added.
-            2 - For a user without access : Requesting to join the project (they had a link for or made visible to them). 
-                Once ACCEPT_NEW_ASSOCIATE_VOTE_RATE % of the group accept, the new associate is added.
+    USES :  1 - For a user that has access : Sends an invite to a user to join their project or sub-project
+            2 - For a user without access : Sends a request to join a project or sub-project
 
     HOW IT WORKS :
-            1 - A button to add someone to the project
-            1 - The is_invite field is True when a user with access requests for to join the project
-            2 - The is_accepted field is True when the invitee accepts invitation or they sent the request.
-            3 - The is_approved field is True when the group approves it by ACCEPT_NEW_ASSOCIATE_VOTE_RATE %.
-            4 - A UserAccess is created if accepted and the user has never been an associate on this project and
+            1 - In case of invite: Enter the name or username of the user(s) to invite
+            2 - In case of request: Click on the project of concern, click on join button
+            1 - The is_invite field is True when a user with access invite a user to join the project
+            2 - The is_accepted field is True when the invitee accepts the invite or when someone in the project accepts 
+                the request.
+            2 - The is_declined field is True when the invitee decline the invite or when someone in the project declines 
+                the request.
+            4 - A UserAccess is created if accepted and if the user has never been an associate on this project. Then
                 user_access = the created access
             5 - If the user already has an invalid access, the has_access field of the access is turned back to True and
                 user_access = that access
