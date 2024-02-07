@@ -81,7 +81,7 @@ class ProjectSerializer (serializers.ModelSerializer):
 class UserAccessSerializer (serializers.ModelSerializer):
     class Meta:
         model = UserAccess
-        fields = ['is_valid', 'user', 'is_creator', 'is_active', 'project', 'mark_complete', 'difficulty', 'weight']
+        fields = ['user', 'is_creator', 'is_active', 'project', 'mark_complete', 'difficulty', 'weight']
     # project_title = serializers.SerializerMethodField(method_name='get_project_title')
     # def get_project_title (self, user_access : UserAccess):
     #     return user_access.project.title

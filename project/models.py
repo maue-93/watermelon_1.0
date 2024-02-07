@@ -10,7 +10,7 @@ from post.models import Tag
 
 # import custom metrics for more flexibility
 from .constants import  DEFAULT_DIFFICULTY, DIFFICULTY_CHOICES, \
-                        DEFAULT_WEIGHT, WEIGHT_CHOICES, \
+                        DEFAULT_WEIGHT, WEIGHT_CHOICES, DEFAULT_RATE_COMPLETE_STATUS,\
                         DEFAULT_TOPIC_TITLE_MAX_LENGTH
 
 # end of imports
@@ -28,9 +28,11 @@ from .constants import  DEFAULT_DIFFICULTY, DIFFICULTY_CHOICES, \
 
 # Create your models here.
 """
-    last review : 02/05/2023 - by eliso morazara
-    abstract model = WithCreateUpdateTrashTime
-    USES:   1 - Any models that need created_at and updated_at fields can inherit from it
+    last review : 02/07/2023 - by eliso morazara
+
+    ABSTRACT MODEL = WithCreateUpdateTrashTime
+
+    USES:   1 - Any models that need created_at, updated_at, and trashed_at fields can inherit from it
             2 - Avoid errors in repetition
 
     INHERITING MODELS : 
@@ -52,24 +54,25 @@ class WithCreateUpdateTrashTime(models.Model):
 
 
 """
-    last review : 02/05/2023 - by eliso morazara
+    last review : 02/07/2023 - by eliso morazara
 
     MODEL = Project : a project/goal
 
-    USES :  1 - A base point to track how a project or sub-project is going
+    USES :  1 - A base point to track progress of a project and its parent project
 
-    WHY :   1 - Underatanding how far you have come and how far there is left to go in your project is essential
+    WHY :   1 - Understanding how far you have come and how far there is left to go in your project is essential
 
     HOW IT WORKS : 
-            1 - You can create a Project with a button
-            2 - Add the title, optional description, and optional deadline
-            3 - After you have created the project, it asks if you want to invite someone to the project.
+            1 - To create a project, add the title, optional description, optional deadline, and optional image
+            2 - After you have created the project, if not root project, it asks you to input difficulty and weight to the 
+                project
+            3 - Then after that, it asks if you want to invite someone to the project.
 
     NOTICE: 1 - If change Model Class Name, MAKE SURE to update model string name in parent field
             2 - The creator of the project is determined by the UserAccess model;
                 a - The related field name in Project is "user_accesses", 
                 b - Then look for a UserAccess that has the field is_creator as True
-            3 - The is_complete field is True when more than 70% users have marked it complete
+            3 - The is_complete field is True when more than DEFAULT_RATE_COMPLETE_STATUS% users have marked it complete
             4 - To find the difficulty and weight of a project, we use the related user_accesses field
             5 - To find how much difficulty or weight has been tackled, we use the related progresses field
     TO DO : 1 - Add a deadline default value of 2 weeks from creation
@@ -78,7 +81,9 @@ class WithCreateUpdateTrashTime(models.Model):
             3 - Review difficulty and weight defaults and choices
             4 - Make sure we have a code to make is_complete True when number of complete marks is met
             5 - Find out if editable=True in deadline field is necessary
-            6 - A Q-A project where a professor or student answer students' questions 
+            6 - Add a discusion Q&A platform (project). At the to of group assignment for example. 
+                Simple posts in the project can be used to do this. 
+            7 - Add an image field
 
     RELATED FIELDS :
         - subprojects : model = Project : sub-projects of this project
@@ -96,7 +101,7 @@ class Project (WithCreateUpdateTrashTime):
 
 
 """
-    last review : 12/30/2023 - by eliso morazara
+    last review : 02/07/2023 - by eliso morazara
 
     MODEL = UserAccess : a user access to a project
 
@@ -114,7 +119,9 @@ class Project (WithCreateUpdateTrashTime):
                 b - only the is_valid field is changed back to True
             6 - The is_active field is True when the user is currently working on this project
             7 - The mark_complete field is True when the user marks the project complete
-            8 - It is never deleted unless the project is deleted
+            8 - The show_project field is False when the user decide to hide the projects from feed, notifications, and
+                most of the features in the app
+            9 - It is never deleted unless the project is deleted
 
     NOTICE: 1 - We should worry about is_creator only at the creation of the project
             2 - A project can have many creators
@@ -133,12 +140,12 @@ class Project (WithCreateUpdateTrashTime):
         - sessions : model = Session : set of sessions done by this user on this project
 """
 class UserAccess (WithCreateUpdateTrashTime):
-    is_valid = models.BooleanField(default=True)
-    show_project = models.BooleanField(default=True)
+    project = models.ForeignKey(Project, related_name='user_accesses', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='project_accesses', null=True, on_delete=models.SET_NULL)
     is_creator = models.BooleanField(default=False)
+    has_access = models.BooleanField(default=True)
+    show_project = models.BooleanField(default=True)
     is_active = models.BooleanField(default=False)
-    project = models.ForeignKey(Project, related_name='user_accesses', on_delete=models.CASCADE)
     mark_complete = models.BooleanField(default=False)
     difficulty = models.PositiveSmallIntegerField(default=DEFAULT_DIFFICULTY, choices=DIFFICULTY_CHOICES)
     weight = models.PositiveSmallIntegerField(default=DEFAULT_WEIGHT, choices=WEIGHT_CHOICES)
