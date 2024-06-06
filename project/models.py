@@ -5,6 +5,9 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
 
 from post.models import Tag
 
@@ -52,6 +55,12 @@ class WithCreateUpdateTrashTime(models.Model):
         abstract = True
 # end of WithCreateUpdateTrashTime
 
+class MyModel(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+# end of MyModel
 
 """
     last review : 02/07/2024 - by eliso morazara
