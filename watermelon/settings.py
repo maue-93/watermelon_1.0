@@ -34,7 +34,11 @@ SECRET_KEY = "django-insecure-m)4c4jlms%hqju=(#vvj)3!vavdms4e8wt3pm^0y$ybckmh^1$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [*]
+
+CREATE USER 'your_database_user'@'localhost' IDENTIFIED BY 'your_database_password';
+GRANT ALL PRIVILEGES ON your_database_name.* TO 'your_database_user'@'localhost';
+FLUSH PRIVILEGES;
 
 
 # Application definition
